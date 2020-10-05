@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<head>
+    <title>Список студентов</title>
+    <style>
+        .main-table
+        {
+            border-style: solid;
+            border-width: 1px;
+        }
+        td
+        {
+            border-style: solid;
+            border-width: 1px;
+        }
+        form
+        {
+            padding: 5px;
+            border-style: solid;
+            border-width: 1px;
+        }
+        form td
+        {
+            border-style: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Список студентов</h1>
+    <table>
+        <thead>
+            <tr>
+                <td>#</td>
+                <td>ФИО</td>
+                <td>Курс</td>
+                <td>Специальность</td>
+                <td>№ зачётной книжки</td>
+                <td></td>
+                <td></td>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+    </table>
+
+    <script>
+        fetch('/student-list')
+        .then(res => res.json())
+        .then(result =>{
+            for(let i = 0; i < result.length; i++)
+            {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `<td>${result[i].id}</td>
+                                    <td>${result[i].fio}</td>
+                                    <td>${result[i].course}</td>
+                                    <td>${result[i].spec}</td>
+                                    <td>${result[i].number}</td>
+                                    <td><input type="button" value="Изменить" 
+                                        data-id="${result[i].id}" onclick="EditHandler(this)"/></td>
+                                    <td><input type="checkbox" data-id="${result[i].id}"/></td>`;
+                document.querySelector('#table-body').append(newRow);
+            }
+        });
+    </script>
+
+    <input id="add-student-button" type="button" value="Добавить запись"/>
+    <input id="delete-student-button" type="button" value="Удалить выделенные записи"/>
+    <form id="add-student-form" name="add-student" data-id="-1" style="display: none">
+        <h2>Форма добавления/изменения данных<input id="close-form-button" type="button" value="[X]" 
+            style="font-size: 16pt;"/></h2>
+        <table>
+            <tr>
+                <td><p>ФИО</p></td>
+                <td><input id="student-fio" type="text"/></td>
+            </tr>
+            <tr>
+                <td><p>Курс</p></td>
+                <td><input id="student-course" type="number" min = "1" max = "5" value="1"/></td>
+            </tr>
+            <tr>
+                <td><p>Специальность</p></td>
+                <td><input id="student-spec" type="text"/></td>
+            </tr>
+            <tr>
+                <td><p>№ зачётной книжки</p></td>
+                <td><input id="student-number" type="text"/></td>
+            </tr>
+        </table>
+        <input id="confirm-button" type="submit" value="Добавить"/>
+    </form>
+
+    <script src="/src/handlers.js"></script>
+</body>
