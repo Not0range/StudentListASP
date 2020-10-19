@@ -45,17 +45,17 @@ namespace StudentList
                     await context.Response.SendFileAsync("static" + context.Request.Path);
                 });
 
-                endpoints.MapGet("/student-list", async context =>
+                endpoints.MapGet("/students", async context =>
                 {
                     await context.Response.WriteAsync(JsonConvert.SerializeObject(students.ToArray()));
                 });
 
                 endpoints.MapGet("/last-id", async context =>
                 {
-                    await context.Response.WriteAsync((students.Count > 0 ? students[-1].id + 1 : 0).ToString());
+                    await context.Response.WriteAsync((students.Count > 0 ? students[students.Count - 1].id + 1 : 0).ToString());
                 });
 
-                endpoints.MapPut("/add-student", async context =>
+                endpoints.MapPut("/students", async context =>
                 {
                     try
                     {
@@ -73,7 +73,7 @@ namespace StudentList
                     }
                 });
 
-                endpoints.MapPost("/edit-student", async context =>
+                endpoints.MapPost("/students", async context =>
                 {
                     try
                     {
@@ -101,7 +101,7 @@ namespace StudentList
                     }
                 });
 
-                endpoints.MapDelete("/delete-student", async context =>
+                endpoints.MapDelete("/students", async context =>
                 {
                     try
                     {

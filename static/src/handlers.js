@@ -50,7 +50,7 @@ document.forms[0].onsubmit = () =>{
                                     data-id="${result}" onclick="EditHandler(this)"/></td>
                                 <td><input type="checkbox" data-id="${result}"/></td>`;
             document.querySelector('#table-body').append(newRow);
-            fetch('/add-student', 
+            fetch('/students', 
             {
                 method: 'PUT', 
                 headers: {
@@ -67,7 +67,7 @@ document.forms[0].onsubmit = () =>{
     }
     else
     {
-        fetch('/edit-student', 
+        fetch('/students', 
         {
             method: 'POST', 
             headers: {
@@ -119,7 +119,7 @@ deleteButtonElem.addEventListener('click', () =>{
         return;
     }
     
-    fetch('/delete-student', 
+    fetch('/students', 
         {
             method: 'DELETE', 
             headers: {
