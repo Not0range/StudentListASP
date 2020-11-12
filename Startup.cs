@@ -15,6 +15,7 @@ namespace StudentList
 {
     public class Startup
     {
+        const string sql = "172.18.0.2";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -26,6 +27,7 @@ namespace StudentList
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddHttpClient("sql", c => c.BaseAddress = new Uri($"http://{sql}:4200/_sql"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,7 +51,8 @@ namespace StudentList
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapGet("/last-id", async ctx => ctx.Response.Redirect("/students/last-id"));
+                endpoints.MapGet("/last-id", 
+                    async ctx => await Task.Run(() => ctx.Response.Redirect("/students/last-id")));
             });
         }
     }

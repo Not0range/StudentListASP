@@ -1,5 +1,8 @@
 using System;
+using System.Text;
+using System.Text.Json;
 using System.IO;
+using System.Net.Http;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,51 +16,128 @@ namespace StudentList.Controllers
     [Route("[controller]")]
     public class StudentsController : ControllerBase
     {
+        private readonly IHttpClientFactory _clientFactory;
         public static List<Student> students = new List<Student>();
-        private readonly ILogger<StudentsController> _logger;
-
-        public StudentsController(ILogger<StudentsController> logger)
+        public StudentsController(IHttpClientFactory clientFactory)
         {
-            _logger = logger;
+            _clientFactory = clientFactory;
         }
 
         [HttpGet]
-        public IEnumerable<Student> Get()
+        public async Task<object[][]> Get()
         {
-            return students;
+            var body = new StringContent(
+                JsonSerializer.Serialize(new {stmt = 
+                "Select * from Students order by id"}), 
+                Encoding.UTF8, "application/json");
+            var client = _clientFactory.CreateClient("sql");
+            var response = await client.PostAsync("", body);
+            response.EnsureSuccessStatusCode();
+            return JsonSerializer.Deserialize<SqlResponse>(await (response).Content.ReadAsStringAsync()).rows;
         }
 
         [HttpGet("last-id")]
-        public int GetLastId()
+        public async Task<int> GetLastId()
         {
-            return students.Count > 0 ? students[^1].id + 1 : 0;
+            var body = new StringContent(
+                JsonSerializer.Serialize(new {stmt = 
+                "select ID from Students Order by ID desc Limit 1"}), 
+                Encoding.UTF8, "application/json");
+            var client = _clientFactory.CreateClient("sql");
+            var response = await client.PostAsync("", body);
+            response.EnsureSuccessStatusCode();
+
+            var sql = JsonSerializer.Deserialize<SqlResponse>(await response.Content.ReadAsStringAsync());
+            int id = 0;
+            if(sql.rowcount > 0)
+            {
+                ((JsonElement)sql.rows[0][0]).TryGetInt32(out id);
+                id++;
+            }
+            return id;
         }
 
         [HttpPut]
         [Consumes("application/json")]
-        public IActionResult Add(Student s)
+        public async Task<IActionResult> Add(Student s)
         {
-            students.Add(s);
+            if(!Request.Cookies.ContainsKey("id"))
+                return StatusCode(401);
+
+            var body = new StringContent(
+                JsonSerializer.Serialize(new {stmt = 
+                "select * from Cookies " +
+                "Where cookie = '" + Request.Cookies["id"] + "'"}), 
+                Encoding.UTF8, "application/json");
+            var client = _clientFactory.CreateClient("sql");
+            var response = await client.PostAsync("", body);
+            response.EnsureSuccessStatusCode();
+            if(JsonSerializer.Deserialize<SqlResponse>(await response.Content.ReadAsStringAsync()).rowcount == 0)
+                return StatusCode(401);
+            
+            body = new StringContent(
+                JsonSerializer.Serialize(new {stmt = 
+                "insert into Students values(" +
+                $"{s.id},'{s.fio}', {s.course}, '{s.spec}', '{s.number}')"}), 
+                Encoding.UTF8, "application/json");
+            response = await client.PostAsync("", body);
+            response.EnsureSuccessStatusCode();
             return Created("/student", s);
         }
 
         [HttpPost]
-        public IActionResult Edit(Student s)
+        [Consumes("application/json")]
+        public async Task<IActionResult> Edit(Student s)
         {
-            Student temp = students.Find(student => student.id == s.id);
-            temp.fio = s.fio;
-            temp.course = s.course;
-            temp.spec = s.spec;
-            temp.number = s.number;
+            if(!Request.Cookies.ContainsKey("id"))
+                return StatusCode(401);
+
+            var body = new StringContent(
+                JsonSerializer.Serialize(new {stmt = 
+                "select * from Cookies " +
+                "Where cookie = '" + Request.Cookies["id"] + "'"}), 
+                Encoding.UTF8, "application/json");
+            var client = _clientFactory.CreateClient("sql");
+            var response = await client.PostAsync("", body);
+            response.EnsureSuccessStatusCode();
+            if(JsonSerializer.Deserialize<SqlResponse>(await response.Content.ReadAsStringAsync()).rowcount == 0)
+                return StatusCode(401);
+            
+            body = new StringContent(
+                JsonSerializer.Serialize(new {stmt = 
+                "update Students set " +
+                $"fio='{s.fio}', course={s.course}, spec='{s.spec}', num='{s.number}'" +
+                $"where id={s.id}"}), 
+                Encoding.UTF8, "application/json");
+            response = await client.PostAsync("", body);
+            response.EnsureSuccessStatusCode();
             return Accepted();
         }
 
         [HttpDelete]
-        public IActionResult Delete(IEnumerable<int> m)
+        [Consumes("application/json")]
+        public async Task<IActionResult> Delete(IEnumerable<int> m)
         {
-            List<Student> temp = students.FindAll(s => m.Any(i => i == s.id));
-            foreach(var t in temp)
-                students.Remove(t);
+            if(!Request.Cookies.ContainsKey("id"))
+                return StatusCode(401);
+
+            var body = new StringContent(
+                JsonSerializer.Serialize(new {stmt = 
+                "select * from Cookies " +
+                "Where cookie = '" + Request.Cookies["id"] + "'"}), 
+                Encoding.UTF8, "application/json");
+            var client = _clientFactory.CreateClient("sql");
+            var response = await client.PostAsync("", body);
+            response.EnsureSuccessStatusCode();
+            if(JsonSerializer.Deserialize<SqlResponse>(await response.Content.ReadAsStringAsync()).rowcount == 0)
+                return StatusCode(401);
+            
+            body = new StringContent(
+                JsonSerializer.Serialize(new {stmt = 
+                "delete from Students where " + string.Join(" or ", m.Select(i => "id=" + i))}), 
+                Encoding.UTF8, "application/json");
+            response = await client.PostAsync("", body);
+            response.EnsureSuccessStatusCode();
             return Accepted();
         }
     }

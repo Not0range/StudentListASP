@@ -2,13 +2,13 @@
 <head>
     <title>Список студентов</title>
     <style>
-        .main-table
+        .login-hide
         {
-            border-style: solid;
-            border-width: 1px;
+            display: none;
         }
-        td
+        table, td
         {
+            border-collapse: collapse;
             border-style: solid;
             border-width: 1px;
         }
@@ -18,7 +18,7 @@
             border-style: solid;
             border-width: 1px;
         }
-        form td
+        form table, form td
         {
             border-style: none;
         }
@@ -34,43 +34,23 @@
                 <td>Курс</td>
                 <td>Специальность</td>
                 <td>№ зачётной книжки</td>
-                <td></td>
-                <td></td>
+                <td class="login-hide"></td>
+                <td class="login-hide"></td>
             </tr>
         </thead>
         <tbody id="table-body">
         </tbody>
     </table>
 
-    <script>
-        fetch('/students')
-        .then(res => res.json())
-        .then(result =>{
-            for(let i = 0; i < result.length; i++)
-            {
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `<td>${result[i].id}</td>
-                                    <td>${result[i].fio}</td>
-                                    <td>${result[i].course}</td>
-                                    <td>${result[i].spec}</td>
-                                    <td>${result[i].number}</td>
-                                    <td><input type="button" value="Изменить" 
-                                        data-id="${result[i].id}" onclick="EditHandler(this)"/></td>
-                                    <td><input type="checkbox" data-id="${result[i].id}"/></td>`;
-                document.querySelector('#table-body').append(newRow);
-            }
-        });
-    </script>
-
-    <input id="add-student-button" type="button" value="Добавить запись"/>
-    <input id="delete-student-button" type="button" value="Удалить выделенные записи"/>
-    <form id="add-student-form" name="add-student" data-id="-1" style="display: none">
+    <input id="add-student-button" class="login-hide" type="button" value="Добавить запись">
+    <input id="delete-student-button" class="login-hide" type="button" value="Удалить выделенные записи">
+    <form id="add-student-form" method="POST" name="add-student" data-id="-1" style="display: none">
         <h2>Форма добавления/изменения данных<input id="close-form-button" type="button" value="[X]" 
             style="font-size: 16pt;"/></h2>
         <table>
             <tr>
                 <td><p>ФИО</p></td>
-                <td><input id="student-fio" type="text"/></td>
+                <td><input id="student-fio" type="text" maxlength="30"></td>
             </tr>
             <tr>
                 <td><p>Курс</p></td>
@@ -78,15 +58,45 @@
             </tr>
             <tr>
                 <td><p>Специальность</p></td>
-                <td><input id="student-spec" type="text"/></td>
+                <td><input id="student-spec" type="text" maxlength="50"></td>
             </tr>
             <tr>
                 <td><p>№ зачётной книжки</p></td>
-                <td><input id="student-number" type="text"/></td>
+                <td><input id="student-number" type="text" maxlength="10"></td>
             </tr>
         </table>
         <input id="confirm-button" type="submit" value="Добавить"/>
     </form>
 
+    <p id="greeting" style="position: absolute; right: 5%; top: 0%;">Здравствуй, гость</p>
+    <input id="login-button" type="button" value="Вход" style="position: absolute; right: 5%; top: 5%; width: 60px;">
+    <input id="logout-button" class="login-hide" type="button" value="Выход" style="position: absolute; right: 5%; top: 5%; width: 60px;">
+
+    <form id="login-form" method="POST" style="border-style: solid; position: absolute; display: none; right: 0%; top: 10%; width: 300px; background-color: white;">
+        <p>Имя пользователя</p>
+        <input id="login-textbox" type="text" maxlength="30"><br>
+        <p>Пароль</p>
+        <input id="password-textbox" name="login" type="password" maxlength="30"><br><br><br>
+        <input type="submit" name="password" value="Войти" style="position: absolute; right: 0%; bottom: 0%; margin: 10px;">
+    </form>
+
+    <script>
+        fetch('/students')
+        .then(res => res.json())
+        .then(result =>{
+            for(let i = 0; i < result.length; i++){
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `<td>${result[i][0]}</td>
+                                    <td>${result[i][1]}</td>
+                                    <td>${result[i][2]}</td>
+                                    <td>${result[i][3]}</td>
+                                    <td>${result[i][4]}</td>
+                                    <td class="login-hide"><input type="button" value="Изменить" 
+                                        data-id="${result[i][0]}" onclick="EditHandler(this)"/></td>
+                                    <td class="login-hide"><input type="checkbox" data-id="${result[i][0]}"/></td>`;
+                document.querySelector('#table-body').append(newRow);
+            }
+        });
+    </script>
     <script src="/handlers.js"></script>
 </body>
