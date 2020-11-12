@@ -1,4 +1,4 @@
-const addButtonElem = document.querySelector('#add-student-button');
+﻿const addButtonElem = document.querySelector('#add-student-button');
 addButtonElem.addEventListener('click', () => {
     if(document.forms[0].dataset.id != '-1')
     {
@@ -56,9 +56,9 @@ document.forms[0].onsubmit = () =>{
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
                 },
-                body: JSON.stringify({id: result, 
+                body: JSON.stringify({id: +result, 
                     fio: fio.value,
-                    course: course.value,
+                    course: +course.value,
                     spec: spec.value,
                     number: num.value})
             });
@@ -73,9 +73,9 @@ document.forms[0].onsubmit = () =>{
             headers: {
                 'Content-Type': 'application/json;charset=utf-8'
             },
-            body: JSON.stringify({id: document.forms[0].dataset.id, 
+            body: JSON.stringify({id: +document.forms[0].dataset.id, 
                 fio: fio.value,
-                course: course.value,
+                course: +course.value,
                 spec: spec.value,
                 number: num.value})
         });
@@ -108,7 +108,7 @@ deleteButtonElem.addEventListener('click', () =>{
         const e = rows[i].querySelectorAll('input')[1];
         if(e.checked)
         {
-            a.push(e.dataset.id);
+            a.push(+e.dataset.id);
             rows[i].remove();
         }
     }
