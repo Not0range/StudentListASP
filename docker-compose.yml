@@ -8,5 +8,3 @@ services:
         image: "crate:latest"
         volumes:
             - ./data:/data
-        ports:
-            - "4200:4200"
