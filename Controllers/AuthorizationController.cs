@@ -25,7 +25,7 @@ namespace StudentList.Controllers
             _clientFactory = clientFactory;
         }
 
-        [HttpGet("login")]
+        [HttpGet("/login")]
         public async Task<ActionResult<string>> CheckLogin()
         {
             if(!Request.Cookies.ContainsKey("id"))
@@ -47,7 +47,10 @@ namespace StudentList.Controllers
             var response = await client.PostAsync("", body);
             response.EnsureSuccessStatusCode();
             var sql = JsonSerializer.Deserialize<SqlResponse>(await response.Content.ReadAsStringAsync());
-            return sql.rows[0][2].ToString();
+            if(sql.rowcount > 0)
+                return sql.rows[0][2].ToString();
+            else
+                return Unauthorized();
         }
 
         [HttpPost("/login")]

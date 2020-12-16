@@ -2,7 +2,6 @@
 .then(chk => {
     if(chk.ok)
         chk.text().then((chk_result) => {
-            console.log('a');
             document.styleSheets[0].cssRules[0].style.display = '';
             document.querySelector('#login-button').style.display = 'none';
             document.querySelector('#greeting').innerHTML = `Здравствуй, ${chk_result}`;
